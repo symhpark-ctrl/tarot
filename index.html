@@ -3,52 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>타로 운명 계산기</title>
+    <title>타로 성격/영혼/연도 운명 계산기</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
         h2 { color: #6a0dad; margin-bottom: 1.5rem; }
-        label { display: block; text-align: left; margin-top: 10px; font-weight: bold; color: #555; }
-        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
-        button { background-color: #6a0dad; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 15px; }
-        button:hover { background-color: #4b087d; }
-        .result { margin-top: 20px; padding: 15px; background: #f9f0ff; border-radius: 10px; text-align: left; display: none; line-height: 1.6; }
-        .result-item { margin-bottom: 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
+        label { display: block; text-align: left; margin-top: 15px; font-weight: bold; color: #444; }
+        input, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
+        button { background: linear-gradient(135deg, #6a0dad, #8e44ad); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .result { margin-top: 25px; text-align: left; display: none; border-top: 2px solid #eee; padding-top: 20px; }
+        .card-box { background: #f9f0ff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #6a0dad; }
+        .card-title { font-size: 1.1rem; font-weight: bold; color: #6a0dad; margin-bottom: 8px; display: block; }
+        .card-desc { font-size: 0.95rem; color: #333; line-height: 1.6; white-space: pre-wrap; }
+        .highlight { color: #d35400; font-weight: bold; }
     </style>
 </head>
 <body>
+
 <div class="container">
     <h2>🔮 타로 운명 계산기</h2>
+    <p style="color: #666; font-size: 0.9rem;">생년월일을 입력하고 나의 운명 카드를 확인하세요.</p>
+    
     <label>생년월일 (8자리)</label>
     <input type="number" id="birth" placeholder="예: 19900725">
+    
     <label>운세를 볼 연도</label>
     <input type="number" id="year" value="2026">
-    <button onclick="calculateTarot()">나의 카드 확인하기</button>
+    
+    <button onclick="calculateTarot()">결과 확인하기</button>
+
     <div id="resultBox" class="result">
-        <div class="result-item">✨ <b>성격카드:</b> <span id="personalityText" style="color:#6a0dad; font-weight:bold;"></span></div>
-        <div class="result-item">🧘 <b>영혼카드:</b> <span id="soulText" style="color:#6a0dad; font-weight:bold;"></span></div>
-        <div class="result-item">📅 <b>연도카드:</b> <span id="yearCardText" style="color:#6a0dad; font-weight:bold;"></span></div>
+        <div class="card-box">
+            <span class="card-title">✨ 성격카드 (나의 외적 성향)</span>
+            <div id="personalityResult" class="card-desc"></div>
+        </div>
+        <div class="card-box">
+            <span class="card-title">🧘 영혼카드 (나의 내적 본질)</span>
+            <div id="soulResult" class="card-desc"></div>
+        </div>
+        <div class="card-box">
+            <span class="card-title" id="yearTitle">📅 연도별 흐름</span>
+            <div id="yearResult" class="card-desc"></div>
+        </div>
     </div>
 </div>
+
 <script>
-    function sumDigits(num) { return num.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0); }
-    function reduceToTarot(num) { while (num > 21) { num = sumDigits(num); } return num; }
+    const tarotData = {
+        0: { name: "바보", trait: "자유로운 영혼, 모험심, 즉흥적", year: "새로운 시작, 예기치 못한 변화" },
+        1: { name: "마법사", trait: "창의적, 다재다능, 설득력", year: "기회의 해, 능력 발휘, 자원 활용" },
+        2: { name: "여사제", trait: "직관적, 비밀스러움, 내면 탐구", year: "내면의 성장, 진실 파악, 직관 강화" },
+        3: { name: "여황제", trait: "풍요로움, 양육적, 감성 풍부", year: "풍요, 창조성, 관계 강화의 시기" },
+        4: { name: "황제", trait: "책임감, 리더십, 안정 추구", year: "구조 세우기, 권위, 결정력 요구" },
+        5: { name: "교황", trait: "전통 중시, 신념, 배움과 가르침", year: "규범, 소속감 중시, 귀인과의 만남" },
+        6: { name: "연인", trait: "관계 중심, 조화, 사랑이 중요한 성향", year: "선택의 해, 사랑과 관계에 주목" },
+        7: { name: "전차", trait: "강한 의지, 도전정신, 목표 지향", year: "추진력, 돌파력 상승, 집중력 필요" },
+        8: { name: "힘", trait: "인내심, 자기통제, 온유한 강함", year: "내면의 힘 발휘, 감정 조절의 해" },
+        9: { name: "은둔자", trait: "사색가, 독립적, 지혜 추구", year: "자기 반성, 내면의 소리 듣기" },
+        10: { name: "운명의 수레바퀴", trait: "운명에 민감, 기회에 민첩", year: "전환점, 예상 못한 변화, 행운" },
+        11: { name: "정의", trait: "공정성, 이성적, 균형감각", year: "결단력, 책임의 해, 공정한 결과" },
+        12: { name: "행맨", trait: "희생정신, 인내심, 역발상", year: "멈춤의 시기, 관점 전환 필요" },
+        13: { name: "죽음", trait: "변화에 유연, 과감한 결정", year: "큰 변화, 이별과 새로운 시작" },
+        14: { name: "절제", trait: "절제력, 중재자, 조화 중시", year: "균형 회복, 조화로운 관계 형성" },
+        15: { name: "악마", trait: "집착, 욕망 뚜렷, 카리스마", year: "유혹, 속박에서 해방 필요, 욕망 직면" },
+        16: { name: "탑", trait: "급진적 변화, 개혁가", year: "충격적 변화, 구조 붕괴 후 재정비" },
+        17: { name: "별", trait: "희망주의자, 영감 풍부", year: "치유와 희망, 영적 성장의 해" },
+        18: { name: "달", trait: "상상력, 감정 풍부, 불안정함", year: "혼란, 감정 정리, 진실에 다가가는 해" },
+        19: { name: "태양", trait: "밝고 낙천적, 성공, 자기표현", year: "성공, 자존감 상승, 활력 넘치는 해" },
+        20: { name: "심판", trait: "회복력, 책임감, 자아성찰", year: "과거 정리, 회복, 영적 각성의 해" },
+        21: { name: "세계", trait: "완성형, 다재다능, 균형", year: "성취의 해, 마무리와 새로운 시작" }
+    };
+
+    function sumDigits(num) {
+        return num.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+    }
+
+    function reduceToTarot(num) {
+        while (num > 21) { num = sumDigits(num); }
+        return num;
+    }
+
     function calculateTarot() {
         const birth = document.getElementById('birth').value;
         const targetYear = document.getElementById('year').value;
+
         if (birth.length !== 8) { alert("생년월일 8자리를 입력해주세요."); return; }
+
         let totalSum = sumDigits(birth);
-        let personality = reduceToTarot(totalSum);
-        let soul = totalSum;
-        while (soul > 9) { soul = sumDigits(soul); }
-        let monthDay = birth.substring(4); 
-        let yearInput = targetYear + monthDay; 
-        let yearCard = reduceToTarot(sumDigits(yearInput));
-        document.getElementById('personalityText').innerText = personality + "번 카드";
-        document.getElementById('soulText').innerText = soul + "번 카드";
-        document.getElementById('yearCardText').innerText = targetYear + "년은 " + yearCard + "번 카드";
+        let pNum = reduceToTarot(totalSum);
+        let sNum = totalSum;
+        while (sNum > 9) { sNum = sumDigits(sNum); }
+
+        let yearInput = targetYear + birth.substring(4); 
+        let yNum = reduceToTarot(sumDigits(yearInput));
+
+        // 결과 텍스트 생성
+        document.getElementById('personalityResult').innerHTML = `카드: <span class="highlight">${pNum}번 ${tarotData[pNum].name}</span>\n특징: ${tarotData[pNum].trait}`;
+        document.getElementById('soulResult').innerHTML = `카드: <span class="highlight">${sNum}번 ${tarotData[sNum].name}</span>\n본질: ${tarotData[sNum].trait}`;
+        document.getElementById('yearTitle').innerText = `📅 ${targetYear}년 연도카드`;
+        document.getElementById('yearResult').innerHTML = `카드: <span class="highlight">${yNum}번 ${tarotData[yNum].name}</span>\n흐름: ${tarotData[yNum].year}`;
+
         document.getElementById('resultBox').style.display = 'block';
     }
 </script>
+
 </body>
 </html>
