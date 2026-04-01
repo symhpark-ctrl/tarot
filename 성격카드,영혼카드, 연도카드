@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타로 성격/영혼/연도카드 계산기</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #6a0dad; margin-bottom: 1.5rem; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
+        button { background-color: #6a0dad; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #4b087d; }
+        .result { margin-top: 20px; padding: 15px; background: #f9f0ff; border-radius: 10px; text-align: left; display: none; }
+        .result-item { margin-bottom: 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
+        .card-name { font-weight: bold; color: #6a0dad; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔮 타로 운명 계산기</h2>
+    <label>생년월일 (8자리)</label>
+    <input type="number" id="birth" placeholder="예: 19900725">
+    
+    <label>기준 연도 (4자리)</label>
+    <input type="number" id="year" value="2026">
+    
+    <button onclick="calculateTarot()">나의 카드 확인하기</button>
+
+    <div id="resultBox" class="result">
+        <div class="result-item">✨ <b>성격카드:</b> <span id="personalityText"></span></div>
+        <div class="result-item">🧘 <b>영혼카드:</b> <span id="soulText"></span></div>
+        <div class="result-item">📅 <b>연도카드:</b> <span id="yearCardText"></span></div>
+    </div>
+</div>
+
+<script>
+    // 숫자 각 자릿수 합치기 함수
+    function sumDigits(num) {
+        return num.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+    }
+
+    // 21 이하로 줄이기 로직 (타로 메이저 아르카나 기준)
+    function reduceToTarot(num) {
+        while (num > 21) {
+            num = sumDigits(num);
+        }
+        return num;
+    }
+
+    function calculateTarot() {
+        const birth = document.getElementById('birth').value;
+        const targetYear = document.getElementById('year').value;
+
+        if (birth.length !== 8) {
+            alert("생년월일 8자리를 입력해주세요.");
+            return;
+        }
+
+        // 1. 성격/영혼카드 계산용 전체 합
+        let totalSum = sumDigits(birth);
+        
+        // 성격카드 (21 이하가 될 때까지 합침)
+        let personality = reduceToTarot(totalSum);
+        
+        // 영혼카드 (한 자리 수가 될 때까지 합침. 단, 1~9까지만)
+        let soul = totalSum;
+        while (soul > 9) {
+            soul = sumDigits(soul);
+        }
+
+        // 2. 연도카드 계산 (생일 월일 + 기준연도)
+        let monthDay = birth.substring(4); // 0725
+        let yearInput = targetYear + monthDay; // 20260725
+        let yearCard = reduceToTarot(sumDigits(yearInput));
+
+        // 결과 표시
+        document.getElementById('personalityText').innerText = personality + "번 카드";
+        document.getElementById('soulText').innerText = soul + "번 카드";
+        document.getElementById('yearCardText').innerText = targetYear + "년은 " + yearCard + "번 카드";
+        document.getElementById('resultBox').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
