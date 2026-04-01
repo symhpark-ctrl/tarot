@@ -3,43 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>타로 운명 계산기 - 나의 성격/영혼카드</title>
+    <title>타로 운명 계산기 - 성격/영혼/연도 카드 해석</title>
+    <meta name="description" content="생년월일로 알아보는 나의 타로 성격카드와 영혼카드. 운세를 볼 연도를 입력하여 올해의 흐름까지 확인하세요.">
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
         .container { background: white; padding: 40px 30px; border-radius: 30px; box-shadow: 0 15px 40px rgba(106, 13, 173, 0.1); width: 100%; max-width: 550px; margin: 20px auto; text-align: center; }
         h2 { color: #6a0dad; font-size: 1.8rem; margin-bottom: 25px; }
-        input { width: 100%; padding: 16px; margin: 15px 0; border-radius: 15px; border: 1px solid #ddd; font-size: 1.1rem; box-sizing: border-box; text-align: center; }
-        .calc-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #6a0dad, #9b59b6); color: white; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .calc-btn:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(106, 13, 173, 0.3); }
-        .result { margin-top: 40px; display: none; text-align: left; }
+        label { display: block; text-align: left; margin-top: 15px; font-weight: 700; color: #444; font-size: 0.9rem; }
+        input { width: 100%; padding: 16px; margin: 8px 0 15px; border-radius: 15px; border: 1px solid #ddd; font-size: 1.1rem; box-sizing: border-box; text-align: center; }
+        .calc-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #6a0dad, #9b59b6); color: white; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .result { margin-top: 40px; display: none; text-align: left; animation: fadeIn 0.6s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card-box { background: #faf8ff; padding: 25px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #eee; }
         .card-title { font-size: 1.1rem; font-weight: 800; color: #6a0dad; margin-bottom: 12px; display: block; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .card-desc { font-size: 1rem; color: #555; line-height: 1.8; }
         .highlight { color: #d35400; font-weight: 800; }
         .blog-section { margin-top: 40px; padding: 30px; background: #fff; border-radius: 25px; border: 2px dashed #e0e0e0; text-align: center; }
-        .naver-btn { display: inline-block; background: #03c75a; color: white; padding: 16px 32px; border-radius: 40px; text-decoration: none; font-weight: 800; margin-bottom: 15px; transition: 0.3s; cursor: pointer; }
-        .naver-btn:hover { background: #02b350; transform: translateY(-3px); }
-        .move-btn { display: inline-block; color: #666; text-decoration: underline; font-size: 14px; cursor: pointer; margin-top: 10px; }
+        .naver-btn { display: inline-block; background: #03c75a; color: white; padding: 16px 32px; border-radius: 40px; text-decoration: none; font-weight: 800; margin-bottom: 15px; }
+        .move-btn { display: inline-block; color: #666; text-decoration: underline; font-size: 14px; cursor: pointer; }
     </style>
 </head>
 <body>
 <div class="container">
     <h2>🔮 타로 운명 계산기</h2>
-    <p style="color:#777; margin-bottom:20px;">생년월일로 나의 '인생 타로 카드'를 찾으세요</p>
+    
+    <label>생년월일 8자리</label>
     <input type="number" id="birth" placeholder="예: 19900521">
-    <button class="calc-btn" onclick="calculate()">나의 카드 확인하기</button>
+    
+    <label>운세를 볼 연도</label>
+    <input type="number" id="targetYear" value="2026">
+    
+    <button class="calc-btn" onclick="calculate()">나의 운명 확인하기</button>
+
     <div id="resultBox" class="result">
         <div class="card-box">
-            <span class="card-title">✨ 성격카드 (나의 성향)</span>
-            <div id="pDesc" class="card-desc"></div>
+            <span class="card-title">✨ 성격카드 (나의 모습)</span>
+            <div id="pDesc"></div>
         </div>
         <div class="card-box">
             <span class="card-title">🧘 영혼카드 (나의 본질)</span>
-            <div id="sDesc" class="card-desc"></div>
+            <div id="sDesc"></div>
         </div>
+        <div class="card-box">
+            <span class="card-title" id="yearTitle">📅 연도카드</span>
+            <div id="yDesc"></div>
+        </div>
+        
         <div class="blog-section">
-            <p style="margin-bottom:15px; font-weight:700;">더 깊은 리딩과 상담은 블로그에서!</p>
             <a href="https://blog.naver.com/symhp1130" target="_blank" class="naver-btn">네이버 블로그 이웃 맺기 💚</a><br>
             <a href="https://symhpark-ctrl.github.io/numerology/" class="move-btn">⬅️ 수비학 탄생수 계산기로 이동</a>
         </div>
@@ -47,40 +57,48 @@
 </div>
 <script>
 const tarot = {
-    0: { n: "0. 바보(The Fool)", p: "자유롭고 낙천적인 성격입니다. 틀에 얽매이지 않는 발상을 하며 항상 새로운 시작을 즐깁니다.", s: "순수한 호기심과 무한한 잠재력이 본질입니다." },
-    1: { n: "1. 마법사(The Magician)", p: "다재다능하고 창의력이 뛰어납니다. 말솜씨와 설득력이 좋아 사람들을 매료시키는 힘이 있습니다.", s: "아이디어를 현실로 만드는 창조주적 본질을 가졌습니다." },
-    2: { n: "2. 여사제(The High Priestess)", p: "차분하고 직관적입니다. 겉으로 드러내기보다 내면의 지혜와 통찰이 깊은 사색가 타입입니다.", s: "영적 지혜와 신비로운 무의식을 탐구하는 본질입니다." },
-    3: { n: "3. 여황제(The Empress)", p: "풍요롭고 모성애가 강합니다. 주변을 따뜻하게 돌보며 예술적 감각과 감수성이 풍부합니다.", s: "만물을 기르고 창조하는 풍요로운 에너지가 본질입니다." },
-    4: { n: "4. 황제(The Emperor)", p: "책임감이 강하고 리더십이 뛰어납니다. 질서와 체계를 중시하며 추진력이 확고한 지도자입니다.", s: "안정적인 기반을 구축하고 다스리는 수호자적 본질입니다." },
-    5: { n: "5. 교황(The Hierophant)", p: "신념이 깊고 조언자 역할에 능합니다. 사람들에게 신뢰를 주며 전통과 도덕을 중시합니다.", s: "지혜를 공유하고 중재하는 정신적 가이드가 본질입니다." },
-    6: { n: "6. 연인(The Lovers)", p: "조화와 소통을 중시합니다. 매력적인 성격으로 관계 맺기를 좋아하며 감정 표현에 솔직합니다.", s: "진정한 연결과 사랑, 가슴 뛰는 선택을 추구하는 본질입니다." },
-    7: { n: "7. 전차(The Chariot)", p: "의지가 강하고 추진력이 대단합니다. 목표를 정하면 앞만 보고 달려가는 불굴의 전사 타입입니다.", s: "장애물을 극복하고 자아를 실현해 나가는 승리의 에너지입니다." },
-    8: { n: "8. 힘(Strength)", p: "겉은 부드럽지만 속은 누구보다 강합니다. 인내심과 포용력으로 상황을 다스리는 카리스마가 있습니다.", s: "내면의 본능을 지혜와 사랑으로 조절하는 고귀한 본질입니다." },
-    9: { n: "9. 은둔자(The Hermit)", p: "사색적이고 독립적입니다. 혼자만의 시간을 통해 진리를 찾으려 하며 깊은 지혜를 가졌습니다.", s: "내면을 비추는 등불을 들고 진실을 찾는 구도자적 본질입니다." },
-    10: { n: "10. 운명의 수레바퀴", p: "변화에 민첩하며 낙천적입니다. 인생의 흐름과 운명을 긍정적으로 받아들이는 유연함이 있습니다.", s: "우주의 순환과 운명적인 변화의 흐름을 타는 본질입니다." },
-    11: { n: "11. 정의(Justice)", p: "공정하고 논리적입니다. 감정에 휘둘리지 않고 균형 잡힌 판단을 내리는 원칙주의자입니다.", s: "우주의 법칙과 인과응보의 균형을 수호하는 본질입니다." },
-    12: { n: "12. 행맨(The Hanged Man)", p: "독특한 시각을 가진 인내주의자입니다. 희생을 감수하더라도 더 큰 가치를 위해 멈출 줄 압니다.", s: "관점의 전환과 기다림을 통해 깨달음을 얻는 본질입니다." },
-    13: { n: "13. 죽음(Death)", p: "결단력이 있고 변화에 과감합니다. 낡은 것을 정리하고 새로운 시작을 준비하는 데 능숙합니다.", s: "과거를 끝내고 새로운 자아로 거듭나는 변용의 본질입니다." },
-    14: { n: "14. 절제(Temperance)", p: "균형과 조화를 중시하는 평화주의자입니다. 서로 다른 것을 섞어 최상의 답을 찾는 중재자입니다.", s: "절제와 소통을 통해 정서적 안정을 창조하는 본질입니다." },
-    15: { n: "15. 악마(The Devil)", p: "매력적이고 에너지가 강합니다. 물질적인 성취욕과 사람을 끄는 강력한 흡입력을 가졌습니다.", s: "욕망과 속박을 마주하고 그 속에서 자유를 찾는 본질입니다." },
-    16: { n: "16. 탑(The Tower)", p: "기존의 틀을 깨는 개혁가 성향입니다. 위기 상황을 재건의 기회로 삼는 강력한 폭발력을 가졌습니다.", s: "거짓된 자아를 무너뜨리고 진실을 드러내는 근본적 본질입니다." },
-    17: { n: "17. 별(The Star)", p: "희망적이고 예술적 영감이 풍부합니다. 주변 사람들에게 긍정과 치유의 에너지를 전파합니다.", s: "우주의 축복과 순수한 꿈을 세상에 드러내는 빛의 본질입니다." },
-    18: { n: "18. 달(The Moon)", p: "상상력이 풍부하고 예민합니다. 보이지 않는 이면의 감정을 잘 읽어내는 신비로운 매력이 있습니다.", s: "두려움 속에서도 진실을 찾아 밤길을 걷는 영적 탐구의 본질입니다." },
-    19: { n: "19. 태양(The Sun)", p: "밝고 당당하며 자신감이 넘칩니다. 모든 일에 활기가 있고 아이 같은 순수한 열정을 가졌습니다.", s: "기쁨과 생명력을 상징하는 성공의 에너지가 본질입니다." },
-    20: { n: "20. 심판(Judgment)", p: "판단력이 명확하고 신념이 확고합니다. 중요한 결단을 내리고 다시 일어서는 부활의 에너지가 강합니다.", s: "내면의 부름을 듣고 깨어나는 영적인 소명의 본질입니다." },
-    21: { n: "21. 세계(The World)", p: "완성도 높고 조화롭습니다. 목표를 끝까지 완수하는 책임감이 있으며 풍부한 경험을 가졌습니다.", s: "하나의 주기를 완성하고 통합하는 완벽한 성취의 본질입니다." }
+    0: { n: "0. 바보", p: "자유롭고 낙천적입니다.", s: "무한한 잠재력이 본질입니다.", y: "새로운 시작의 해입니다." },
+    1: { n: "1. 마법사", p: "창의력이 뛰어납니다.", s: "창조적 능력이 본질입니다.", y: "능력을 발휘할 기회의 해입니다." },
+    2: { n: "2. 여사제", p: "직관적이고 차분합니다.", s: "신비로운 지혜가 본질입니다.", y: "내면의 목소리에 집중할 해입니다." },
+    3: { n: "3. 여황제", p: "풍요롭고 따뜻합니다.", s: "창조와 생산이 본질입니다.", y: "결실을 맺는 풍요로운 해입니다." },
+    4: { n: "4. 황제", p: "책임감이 강한 리더입니다.", s: "질서와 수호가 본질입니다.", y: "기반을 다지고 성취하는 해입니다." },
+    5: { n: "5. 교황", p: "신뢰를 주는 조언자입니다.", s: "정신적 중재가 본질입니다.", y: "귀인을 만나거나 배움을 얻는 해입니다." },
+    6: { n: "6. 연인", p: "소통과 관계를 즐깁니다.", s: "사랑과 연결이 본질입니다.", y: "선택과 파트너십의 해입니다." },
+    7: { n: "7. 전차", p: "추진력이 대단합니다.", s: "장애물 극복이 본질입니다.", y: "거침없이 전진하여 승리하는 해입니다." },
+    8: { n: "8. 힘", p: "부드러운 카리스마가 있습니다.", s: "자기 통제와 인내가 본질입니다.", y: "끈기가 필요한 인내의 해입니다." },
+    9: { n: "9. 은둔자", p: "사색적이고 지혜롭습니다.", s: "진리 탐구가 본질입니다.", y: "자아 성찰과 공부의 해입니다." },
+    10: { n: "10. 운명의 수레바퀴", p: "변화에 민첩합니다.", s: "운명의 흐름을 타는 본질입니다.", y: "큰 전환점이 찾아오는 해입니다." },
+    11: { n: "11. 정의", p: "공정하고 논리적입니다.", s: "균형과 인과응보가 본질입니다.", y: "결단과 책임이 따르는 해입니다." },
+    12: { n: "12. 행맨", p: "시각이 독특합니다.", s: "관점의 전환이 본질입니다.", y: "희생과 기다림이 필요한 해입니다." },
+    13: { n: "13. 죽음", p: "결단력이 과감합니다.", s: "변용과 재생이 본질입니다.", y: "과거를 끝내고 새로 태어나는 해입니다." },
+    14: { n: "14. 절제", p: "중용의 미덕이 있습니다.", s: "조화와 절제가 본질입니다.", y: "균형을 회복하고 조율하는 해입니다." },
+    15: { n: "15. 악마", p: "에너지가 강렬합니다.", s: "욕망의 직면이 본질입니다.", y: "집착을 경계하고 마주하는 해입니다." },
+    16: { n: "16. 탑", p: "틀을 깨는 개혁가입니다.", s: "거짓의 붕괴가 본질입니다.", y: "갑작스러운 변화와 재건의 해입니다." },
+    17: { n: "17. 별", p: "희망과 영감이 가득합니다.", s: "순수한 빛이 본질입니다.", y: "희망이 보이고 치유되는 해입니다." },
+    18: { n: "18. 달", p: "예민하고 상상력이 좋습니다.", s: "무의식 탐구가 본질입니다.", y: "혼란 속에서 길을 찾는 해입니다." },
+    19: { n: "19. 태양", p: "밝고 자신감 넘칩니다.", s: "성공과 기쁨이 본질입니다.", y: "최고의 행운과 활기가 넘치는 해입니다." },
+    20: { n: "20. 심판", p: "판단력이 명확합니다.", s: "소명과 각성이 본질입니다.", y: "기쁜 소식과 부활의 해입니다." },
+    21: { n: "21. 세계", p: "완벽을 추구합니다.", s: "통합과 완성이 본질입니다.", y: "목표를 달성하고 완성하는 해입니다." }
 };
+
 function sumD(n) { return String(n).split('').reduce((a,b)=>a+Number(b),0); }
+function reduceT(n) { while(n>21) n = sumD(n); return n; }
+
 function calculate() {
     const b = document.getElementById('birth').value;
-    if(b.length!==8) return alert("8자리를 입력하세요 (예: 19900101)");
-    let s = sumD(b);
-    let p = s; while(p>21) p = sumD(p);
-    let soul = s; while(soul>9) soul = sumD(soul);
+    const ty = document.getElementById('targetYear').value;
+    if(b.length!==8) return alert("8자리를 입력하세요.");
+
+    let totalS = sumD(b);
+    let p = reduceT(totalS);
+    let s = totalS; while(s>9) s = sumD(s);
+    let y = reduceT(sumD(ty + b.substring(4)));
+
     document.getElementById('pDesc').innerHTML = `<span class="highlight">${tarot[p].n}</span><br>${tarot[p].p}`;
-    document.getElementById('sDesc').innerHTML = `<span class="highlight">${tarot[soul].n}</span><br>${tarot[soul].s}`;
+    document.getElementById('sDesc').innerHTML = `<span class="highlight">${tarot[s].n}</span><br>${tarot[s].s}`;
+    document.getElementById('yearTitle').innerText = `📅 ${ty}년 연도카드`;
+    document.getElementById('yDesc').innerHTML = `<span class="highlight">${tarot[y].n}</span><br>${tarot[y].y}`;
     document.getElementById('resultBox').style.display = 'block';
-    window.scrollTo({ top: document.getElementById('resultBox').offsetTop - 30, behavior: 'smooth' });
 }
 </script>
 </body>
